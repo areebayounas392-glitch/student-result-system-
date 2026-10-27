@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Marks Management System</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f2f5f9; margin: 0; padding: 30px; }
+        .container { max-width: 900px; margin: auto; }
+        h1, h2 { color: #243b53; }
+        .card { background: white; padding: 25px; margin-bottom: 25px; border-radius: 12px; box-shadow: 0 3px 12px rgba(0,0,0,0.08); }
+        label { display: block; margin-top: 12px; font-weight: bold; font-size: 14px; }
+        input { width: 100%; box-sizing: border-box; padding: 10px; margin-top: 5px; border: 1px solid #ccd5df; border-radius: 6px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0 15px; }
+        .subject { border: 1px solid #dce3eb; border-radius: 8px; padding: 5px 15px 15px; margin-top: 15px; }
+        .subject h3 { margin: 12px 0 0; color: #3572a5; }
+        button { margin-top: 20px; padding: 12px 20px; background: #3572a5; color: white; border: none; border-radius: 6px; cursor: pointer; }
+        button:hover { background: #24577f; }
+        .error { color: #b42318; background: #fff0ee; padding: 12px; border-radius: 6px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th, td { padding: 10px; border: 1px solid #dce3eb; text-align: center; }
+        th { background: #3572a5; color: white; }
+        .table-wrapper { overflow-x: auto; }
+        .btn { display: inline-block; padding: 8px 14px; background: #3572a5; color: white; border-radius: 6px; text-decoration: none; font-size: 14px; }
+        .pass { color: #0a7d32; font-weight: bold; }
+        .fail { color: #c0271b; font-weight: bold; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Student Marks Management System</h1>
+
+    <div class="card">
+        <h2>Add Student Result</h2>
+
+        {% if error %}<p class="error">{{ error }}</p>{% endif %}
+
+        <form method="POST">
+            <div class="grid">
+                <div><label>Student Name</label><input type="text" name="name" required></div>
+                <div><label>Father Name</label><input type="text" name="father"></div>
+                <div><label>Roll No</label><input type="text" name="roll_no" required></div>
+                <div><label>Registration No</label><input type="text" name="reg_no"></div>
+                <div><label>Group</label><input type="text" name="group" placeholder="General Science"></div>
+                <div><label>Institution / District</label><input type="text" name="institution"></div>
+            </div>
+
+            {% for s in subjects %}
+            <div class="subject">
+                <h3>{{ s.name }}</h3>
+                <div class="grid">
+                    <div><label>Part-I (max {{ s.th }})</label>
+                        <input type="number" name="{{ s.key }}_1" min="0" max="{{ s.th }}" step="any" required></div>
+                    <div><label>Part-II (max {{ s.th }})</label>
+                        <input type="number" name="{{ s.key }}_2" min="0" max="{{ s.th }}" step="any" required></div>
+                    {% if s.pr %}
+                    <div><label>Practical (max {{ s.pr }})</label>
+                        <input type="number" name="{{ s.key }}_pr" min="0" max="{{ s.pr }}" step="any" required></div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+
+            <button type="submit">Generate Result</button>
+        </form>
+    </div>
+
+    <div class="card">
+        <h2>Student Results</h2>
+        {% if students %}
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr><th>Roll No</th><th>Name</th><th>Total</th><th>Percentage</th><th>Grade</th><th>Result</th><th>Action</th></tr>
+                </thead>
+                <tbody>
+                {% for st in students %}
+                    <tr>
+                        <td>{{ st.roll_no }}</td>
+                        <td>{{ st.name }}</td>
+                        <td>{{ st.grand_total }} / {{ st.grand_max }}</td>
+                        <td>{{ st.percentage }}%</td>
+                        <td>{{ st.grade }}</td>
+                        <td class="{{ 'pass' if st.passed else 'fail' }}">{{ 'PASS' if st.passed else 'FAIL' }}</td>
+                        <td><a class="btn" href="{{ url_for('result', student_id=loop.index0) }}">View Result</a></td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p>No student records yet.</p>
+        {% endif %}
+    </div>
+</div>
+</body>
+</html>
